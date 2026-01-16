@@ -4,51 +4,43 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 
-export default function CreatePlayerPage() {
+export default function CreatePlayer() {
   const router = useRouter();
   const [nickname, setNickname] = useState("");
   const [position, setPosition] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      setError("No hay sesión activa");
+      return;
+    }
 
     const { error } = await supabase.from("players").insert({
+      profile_id: session.user.id,
       nickname,
       position,
     });
 
-    setLoading(false);
-
     if (error) {
-      alert(error.message);
+      setError(error.message);
       return;
     }
 
-    router.push("/");
-  }
+    router.push("/dashboard");
+  };
 
   return (
     <form onSubmit={handleSubmit}>
       <h1>Crear perfil de jugador</h1>
-
-      <input
-        placeholder="Nickname"
-        value={nickname}
-        onChange={(e) => setNickname(e.target.value)}
-        required
-      />
-
-      <input
-        placeholder="Posición"
-        value={position}
-        onChange={(e) => setPosition(e.target.value)}
-      />
-
-      <button disabled={loading}>
-        {loading ? "Creando..." : "Crear jugador"}
-      </button>
+      {error && <p>{error}</p>}
+      <input value={nickname} onChange={e => setNickname(e.target.value)} />
+      <input value={position} onChange={e => setPosition(e.target.value)} />
+      <button type="submit">Crear jugador</button>
     </form>
   );
 }

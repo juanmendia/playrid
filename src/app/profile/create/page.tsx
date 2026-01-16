@@ -2,51 +2,45 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/app/lib/supabase";
+import { supabase } from "@/app/lib/supabase";
 
-export default function CreateProfile() {
-  const supabase = createClient();
+export default function CreatePlayer() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [position, setPosition] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session) {
-      alert("No hay sesión activa");
+      setError("No hay sesión activa");
       return;
     }
 
-    const { error } = await supabase.from("profiles").insert({
-      id: session.user.id,
-      username
+    const { error } = await supabase.from("players").insert({
+      profile_id: session.user.id,
+      nickname,
+      position,
     });
 
     if (error) {
-      alert(error.message);
+      setError(error.message);
       return;
     }
 
-    router.push("/onboarding");
+    router.push("/dashboard");
   };
 
   return (
-    <div className="p-10 space-y-4">
-      <h1 className="text-2xl font-bold">Elegí tu nombre público</h1>
-
-      <input
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        placeholder="ej: Pelamendia"
-        className="border px-3 py-2 w-full"
-      />
-
-      <button
-        onClick={handleSubmit}
-        className="bg-black text-white px-4 py-2 rounded"
-      >
-        Crear perfil
-      </button>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <h1>Crear perfil de jugador</h1>
+      {error && <p>{error}</p>}
+      <input value={nickname} onChange={e => setNickname(e.target.value)} />
+      <input value={position} onChange={e => setPosition(e.target.value)} />
+      <button type="submit">Crear jugador</button>
+    </form>
   );
 }
