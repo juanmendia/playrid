@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/app/lib/supabase";
+import { supabase } from "@/app/lib/supabase";
+
 
 export default function CreateCoach() {
   const supabase = createClient();
