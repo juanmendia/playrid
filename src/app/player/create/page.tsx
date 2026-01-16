@@ -1,16 +1,54 @@
-import { createClient } from "@/app/lib/supabase";
+"use client";
 
-export async function getPlayers() {
-  const supabase = createClient();
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/app/lib/supabase";
 
-  const { data, error } = await supabase
-    .from("players")
-    .select("*");
+export default function CreatePlayerPage() {
+  const router = useRouter();
+  const [nickname, setNickname] = useState("");
+  const [position, setPosition] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  if (error) {
-    console.error("Error fetching players:", error.message);
-    throw error;
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase.from("players").insert({
+      nickname,
+      position,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    router.push("/");
   }
 
-  return data;
+  return (
+    <form onSubmit={handleSubmit}>
+      <h1>Crear perfil de jugador</h1>
+
+      <input
+        placeholder="Nickname"
+        value={nickname}
+        onChange={(e) => setNickname(e.target.value)}
+        required
+      />
+
+      <input
+        placeholder="Posición"
+        value={position}
+        onChange={(e) => setPosition(e.target.value)}
+      />
+
+      <button disabled={loading}>
+        {loading ? "Creando..." : "Crear jugador"}
+      </button>
+    </form>
+  );
 }
