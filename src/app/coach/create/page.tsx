@@ -68,3 +68,5 @@ export default function CreateCoach() {
     </div>
   );
 }
+import { createClient } from "@/app/lib/supabase";  
+const supabase = createClient();
