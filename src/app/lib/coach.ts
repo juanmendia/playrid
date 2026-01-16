@@ -1,16 +1,5 @@
-import { createClient } from "@/app/lib/supabase";
+import { supabase } from "@/app/lib/supabase";
 
 export async function getCoaches() {
-  const supabase = createClient();
-
-  const { data, error } = await supabase
-    .from("coaches")
-    .select("*");
-
-  if (error) {
-    console.error("Error fetching coaches:", error.message);
-    throw error;
-  }
-
-  return data;
+  return supabase.from("coachs").select("*");
 }
