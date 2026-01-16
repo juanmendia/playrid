@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/app/lib/supabase";
+import { createClient } from "@/app/lib/supabase";
 
 export default function CreatePlayer() {
+  const supabase = createClient();
   const router = useRouter();
+
   const [nickname, setNickname] = useState("");
   const [position, setPosition] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,21 +18,19 @@ export default function CreatePlayer() {
     setLoading(true);
     setErrorMsg("");
 
-    // 1️⃣ Usuario logueado
     const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
-    if (userError || !user) {
+    if (sessionError || !session) {
       setErrorMsg("No hay sesión activa");
       setLoading(false);
       return;
     }
 
-    // 2️⃣ Insertar jugador
     const { error } = await supabase.from("players").insert({
-      profile_id: user.id,
+      user_id: session.user.id,
       nickname,
       position,
     });
@@ -41,12 +41,11 @@ export default function CreatePlayer() {
       return;
     }
 
-    // 3️⃣ Redirigir
-    router.push("/player");
+    router.push("/onboarding");
   };
 
   return (
-    <div className="p-10 space-y-4 max-w-md mx-auto">
+    <div className="p-10 max-w-md mx-auto space-y-4">
       <h1 className="text-2xl font-bold">Crear perfil de jugador</h1>
 
       {errorMsg && <p className="text-red-600">{errorMsg}</p>}
@@ -54,7 +53,7 @@ export default function CreatePlayer() {
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           className="border w-full px-3 py-2"
-          placeholder="Nickname"
+          placeholder="Nickname (ej: Pelamendia)"
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
           required
@@ -71,7 +70,7 @@ export default function CreatePlayer() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-black text-white py-2 rounded"
+          className="bg-black text-white px-4 py-2 rounded w-full"
         >
           {loading ? "Creando..." : "Crear jugador"}
         </button>
