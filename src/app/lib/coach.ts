@@ -1,6 +1,6 @@
 import { createClient } from "./supabase";
 
-export async function getCoachs() {
+export async function getCoaches() {
   const supabase = createClient();
 
   const { data, error } = await supabase
@@ -8,8 +8,8 @@ export async function getCoachs() {
     .select("*");
 
   if (error) {
-    console.error("Error obteniendo coaches:", error.message);
-    return [];
+    console.error("Error fetching coaches:", error.message);
+    throw error;
   }
 
   return data;
