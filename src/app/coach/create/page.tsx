@@ -29,7 +29,7 @@ export default function CreateCoach() {
     }
 
     const { error } = await supabase.from("coaches").insert({
-      user_id: session.user.id,
+      profile_id: session.user.id,
       nickname,
     });
 
@@ -39,28 +39,28 @@ export default function CreateCoach() {
       return;
     }
 
-    router.push("/onboarding");
+    router.push("/coach/" + nickname);
   };
 
   return (
-    <div className="p-10 max-w-md mx-auto space-y-4">
-      <h1 className="text-2xl font-bold">Crear perfil de entrenador</h1>
+    <div className="p-10 max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Crear perfil de entrenador</h1>
 
-      {errorMsg && <p className="text-red-600">{errorMsg}</p>}
+      {errorMsg && <p className="text-red-600 mb-2">{errorMsg}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
-          className="border w-full px-3 py-2"
-          placeholder="Nickname (ej: JuanCoach)"
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
+          placeholder="Nickname"
+          className="border px-3 py-2 w-full"
           required
         />
 
         <button
           type="submit"
           disabled={loading}
-          className="bg-black text-white px-4 py-2 rounded w-full"
+          className="px-4 py-2 bg-black text-white rounded w-full"
         >
           {loading ? "Creando..." : "Crear entrenador"}
         </button>
@@ -68,5 +68,3 @@ export default function CreateCoach() {
     </div>
   );
 }
-import { createClient } from "@/app/lib/supabase";  
-const supabase = createClient();
